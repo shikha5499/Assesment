@@ -1,0 +1,5 @@
+1. Let say deployment name is kubia.
+2. Before changing the image, i will change minReadySeconds for that deployment to some value say 15 Secs using below command
+   kubectl patch deployment kubia -p '{"spec": {"minReadySeconds": 10}}' 
+3. Then change the image of deployment using below command.
+   kubectl set image deployment kubia nodejs=luksa/kubia:v2 

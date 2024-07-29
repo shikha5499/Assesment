@@ -1,0 +1,4 @@
+Logging Application: Provides API to write logs in to log files
+
+Such kind of application is used by all other application for logging purpose. So it is neccesary to install 
+such kind of application(using daemon set) in all the worker nodes of cluster instead of random nodes of cluster using replicaset

@@ -1,0 +1,5 @@
+1. First check the targetPort of Service(in Service yaml file) should be same as containerPort of pod(in deployment file)
+2. We will check whether the service is connected to pod or not using below commands
+   kubectl get ep
+   kubectl get pod -o wide
+3. We will check the pod logs whether the request is landing in to application or not

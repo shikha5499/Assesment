@@ -1,0 +1,102 @@
+root@ip-172-31-36-243:~# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-58cc845644-qndwl       1/1     Running   0          5d1h
+redis-6878558678-tzldq    1/1     Running   0          5d1h
+result-86bc6f7b5d-f5zpw   1/1     Running   0          5d1h
+vote-7d884dd585-v2r4f     1/1     Running   0          5d1h
+worker-6fc5d5b668-mk5rz   1/1     Running   0          5d1h
+ 
+root@ip-172-31-36-243:~#  apt-get install git -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.34.1-1ubuntu1.11).
+0 upgraded, 0 newly installed, 0 to remove and 7 not upgraded.
+ 
+ 
+root@ip-172-31-36-243:~# cd /root/example-voting-app/k8s-specifications
+root@ip-172-31-36-243:~/example-voting-app/k8s-specifications# git clone  https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.18 KiB | 8.75 MiB/s, done.
+Resolving deltas: 100% (179/179), done.
+ 
+ 
+root@ip-172-31-36-243:~/example-voting-app/k8s-specifications#  ls -lrth
+total 40K
+-rw-r--r-- 1 root root  292 Jul 24 09:38 worker-deployment.yaml
+-rw-r--r-- 1 root root  192 Jul 24 09:38 vote-service.yaml
+-rw-r--r-- 1 root root  289 Jul 24 09:38 vote-deployment.yaml
+-rw-r--r-- 1 root root  195 Jul 24 09:38 result-service.yaml
+-rw-r--r-- 1 root root  299 Jul 24 09:38 result-deployment.yaml
+-rw-r--r-- 1 root root  152 Jul 24 09:38 redis-service.yaml
+-rw-r--r-- 1 root root  402 Jul 24 09:38 redis-deployment.yaml
+-rw-r--r-- 1 root root  146 Jul 24 09:38 db-service.yaml
+-rw-r--r-- 1 root root  401 Jul 24 09:38 db-deployment.yaml
+drwxr-xr-x 8 root root 4.0K Jul 29 12:23 example-voting-app
+root@ip-172-31-36-243:~/example-voting-app/k8s-specifications#  cat vote-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote
+spec:
+  type: NodePort
+  ports:
+  - name: "vote-service"
+    port: 5000
+    targetPort: 80
+    nodePort: 31002
+  selector:
+    app: vote
+ 
+root@ip-172-31-36-243:~/example-voting-app/k8s-specifications# cat result-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: result
+spec:
+  type: NodePort
+  ports:
+  - name: "result-service"
+    port: 5001
+    targetPort: 80
+    nodePort: 31003
+  selector:
+    app: result
+ root@ip-172-31-36-243:~/example-voting-app/k8s-specifications#  kubectl get nodes
+NAME               STATUS   ROLES           AGE   VERSION
+ip-172-31-36-243   Ready    <none>          10d   v1.27.16
+ip-172-31-37-176   Ready    control-plane   10d   v1.27.16
+
+root@ip-172-31-36-243:~/example-voting-app/k8s-specifications#  kubectl apply -f .
+deployment.apps/db unchanged
+service/db unchanged
+deployment.apps/redis unchanged
+service/redis unchanged
+deployment.apps/result unchanged
+service/result unchanged
+deployment.apps/vote unchanged
+service/vote unchanged
+deployment.apps/worker unchanged
+root@ip-172-31-37-176:~/example-voting-app/k8s-specifications#
+ 
+
+ 
+#Following are the observations: -
+
+If we delete pods their replica will be created again.But when we delete db pod the result will not store in database.
+In order to work result pod and data should store data permanently , I used the concept of PV(Persistent Volume) and  PVC(Persistent Volume Claim).
+ 
+Now try to delete the Pods one by one (first voting Pod, then worker pod, then db pod) 
+   and see what happens to the voting and result app after deleting
+Ans: Earlier results were lost and result app showing 50% each
+     Also, result app is not showing any vote now even if i vote from voting app.
+
+
+what happens after db pod deletion
+   Db application data is lost after db pod deletion. dp pod come up with new data
+
+Complete the assignment by making the result pod work. (if you delete db pod, results would not be captured.
+   So repeat what we did in the class in order to make the result pod work.).
+Ans: Restarted the result pod
